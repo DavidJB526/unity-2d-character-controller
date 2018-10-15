@@ -6,7 +6,17 @@ public class PlayerController : MonoBehaviour {
 
     [SerializeField]
     private float maxSpeed = 10f;
+    [SerializeField]
+    private float jumpForce = 700f;
+    [SerializeField]
+    private Transform groundCheck;
+    [SerializeField]
+    private LayerMask whatIsGround;
+
+    private float groundRadius = 0.2f;
+
     private bool facingRight = true;
+    private bool grounded = false;
 
     private Rigidbody2D rb2d;
     private Animator anim;
@@ -18,14 +28,24 @@ public class PlayerController : MonoBehaviour {
         rb2d = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
 	}
-	
-	// Update is called once per frame
-	void FixedUpdate ()
+
+    private void Update()
     {
+        if (grounded && Input.GetButtonDown("Jump"))
+        {
+            anim.SetBool("ground", false);
+            rb2d.AddForce(new Vector2(0f, jumpForce));
+        }
+    }
+
+    void FixedUpdate ()
+    {
+        grounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, whatIsGround);
+        anim.SetBool("ground", grounded);
+        anim.SetFloat("vSpeed", rb2d.velocity.y);
+
         float move = Input.GetAxis("Horizontal");
-
         anim.SetFloat("speed", Mathf.Abs(move));
-
         rb2d.velocity = new Vector2(move * maxSpeed, rb2d.velocity.y);
 
         if (move > 0 && !facingRight)
