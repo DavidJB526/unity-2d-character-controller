@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour {
 
     private bool facingRight = true;
     private bool grounded = false;
+    private bool doubleJump = false;
 
     private Rigidbody2D rb2d;
     private Animator anim;
@@ -31,10 +32,15 @@ public class PlayerController : MonoBehaviour {
 
     private void Update()
     {
-        if (grounded && Input.GetButtonDown("Jump"))
+        if ((grounded || !doubleJump) && Input.GetButtonDown("Jump"))
         {
             anim.SetBool("ground", false);
             rb2d.AddForce(new Vector2(0f, jumpForce));
+
+            if (!doubleJump && !grounded)
+            {
+                doubleJump = true;
+            }
         }
     }
 
@@ -43,6 +49,11 @@ public class PlayerController : MonoBehaviour {
         grounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, whatIsGround);
         anim.SetBool("ground", grounded);
         anim.SetFloat("vSpeed", rb2d.velocity.y);
+
+        if (grounded)
+        {
+            doubleJump = false;
+        }
 
         float move = Input.GetAxis("Horizontal");
         anim.SetFloat("speed", Mathf.Abs(move));
